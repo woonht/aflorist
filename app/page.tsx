@@ -1,69 +1,75 @@
-import Image from "next/image";
+import { createClient } from '@/utils/supabase/server'
+import ProductGrid from '@/components/ProductGrid'
+import WhatsAppButton from '@/components/WhatsAppButton'
+import { ItemMaster } from '@/types/database'
 
-export default function Home() {
+// Revalidate public catalog every 60 seconds (Incremental Static Regeneration)
+export const revalidate = 60
+
+export default async function HomePage() {
+  const supabase = await createClient()
+
+  // 1. Fetch public flower products from Supabase ItemMaster table[cite: 3, 6]
+  const { data: products, error } = await supabase
+    .from('itemmaster')
+    .select('ItemCode:itemcode, ItemName:itemname, ImageUrl:imageurl, ItemPrice:itemprice, GridX:gridx, GridY:gridy, GridW:gridw, GridH:gridh')
+    .eq('isarchived', false)
+    .order('createdon', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching catalog:', error.message)
+  }
+
+  // Define shop telephone number (Replace with actual florist contact number)
+  const shopPhoneNumber = '60195123707'
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-pink-50/30">
+      {/* Hero / Header Banner */}
+      <header className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-40">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">💐</span>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+              Bloom & Blossom Florist
+            </h1>
+          </div>
+          <a
+            href={`https://wa.me/${shopPhoneNumber}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full bg-green-500 px-4 py-2 text-sm font-semibold text-white shadow transition-hover hover:bg-green-600"
+          >
+            WhatsApp Shop
+          </a>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="mx-auto max-w-7xl px-6 py-10">
+        <section className="mb-8 text-center sm:text-left">
+          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+            Our Floral Catalog
+          </h2>
+          <p className="mt-2 text-base text-gray-600">
+            Browse our hand-crafted bouquet collection. Click any bouquet or the floating button to order directly via WhatsApp.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+        </section>
+
+        {/* Product Catalog Grid */}
+        <ProductGrid
+          products={(products as ItemMaster[]) || []}
+          phoneNumber={shopPhoneNumber}
+        />
       </main>
+
+      {/* Persistent Guest WhatsApp Floating Action Button */}
+      <WhatsAppButton phoneNumber={shopPhoneNumber} />
+
+      {/* Simple Footer */}
+      <footer className="mt-20 border-t bg-white py-8 text-center text-sm text-gray-500">
+        <p>© {new Date().getFullYear()} Bloom & Blossom Florist. All rights reserved.</p>
+      </footer>
     </div>
-  );
+  )
 }
