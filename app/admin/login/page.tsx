@@ -32,6 +32,7 @@ export default function AdminLogin() {
       setIsLoading(false)
     } else {
       router.push('/admin') // Redirect to the protected dashboard on success
+      router.refresh()
     }
   }
 
