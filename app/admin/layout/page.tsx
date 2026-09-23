@@ -19,7 +19,7 @@ export default function LayoutArranger() {
 
   useEffect(() => {
     async function loadLayout() {
-      const { data } = await supabase.from('ItemMaster').select('*').eq('IsArchived', false)
+      const { data } = await supabase.from('itemmaster').select('*').eq('isarchived', false)
       if (data) {
         setProducts(data)
         
@@ -47,12 +47,12 @@ export default function LayoutArranger() {
     setIsSaving(true)
     try {
       for (const item of layout) {
-        await supabase.from('ItemMaster').update({
+        await supabase.from('itemmaster').update({
           GridX: item.x,
           GridY: item.y,
           GridW: item.w,
           GridH: item.h,
-        }).eq('ItemCode', item.i)
+        }).eq('itemcode', item.i)
       }
       alert('Storefront layout updated successfully!')
     } catch (error: any) {
@@ -92,16 +92,16 @@ export default function LayoutArranger() {
         >
           {products.map(p => (
             <div 
-              key={p.ItemCode} 
+              key={p.itemcode} 
               className="flex cursor-move flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg"
             >
-              {p.ImageUrl ? (
-                <img src={p.ImageUrl} alt={p.ItemName} className="mb-3 h-full max-h-50 w-full object-cover rounded" />
+              {p.imageurl ? (
+                <img src={p.imageurl} alt={p.itemname} className="mb-3 h-full max-h-50 w-full object-cover rounded" />
               ) : (
                 <div className="mb-3 h-32 w-32 rounded bg-gray-200" />
               )}
-              <h3 className="text-center font-bold text-gray-800">{p.ItemName}</h3>
-              <p className="text-sm font-semibold text-pink-600">RM {p.ItemPrice.toFixed(2)}</p>
+              <h3 className="text-center font-bold text-gray-800">{p.itemname}</h3>
+              <p className="text-sm font-semibold text-pink-600">RM {p.itemprice.toFixed(2)}</p>
             </div>
           ))}
         </ResponsiveGridLayout>

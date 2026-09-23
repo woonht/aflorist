@@ -24,44 +24,44 @@ export default function PricingEnginePage() {
 
     // 1. Fetch non-archived bouquets[cite: 4]
     const { data: items } = await supabase
-      .from('ItemMaster')
+      .from('itemmaster')
       .select('*')
-      .eq('IsArchived', false)
-      .order('CreatedOn', { ascending: false })
+      .eq('isarchived', false)
+      .order('createdon', { ascending: false })
 
     // 2. Fetch raw material recipes[cite: 4]
     const { data: details } = await supabase
-      .from('ItemDetails')
+      .from('itemdetails')
       .select('*')
-      .eq('IsArchived', false)
+      .eq('isarchived', false)
 
     // 3. Fetch raw material costs[cite: 4]
     const { data: stocks } = await supabase
-      .from('StockMaster')
+      .from('stockmaster')
       .select('*')
-      .eq('IsArchived', false)
+      .eq('isarchived', false)
 
     if (items && details && stocks) {
       // Build lookup maps for fast access
       const stockMap = new Map<string, StockMaster>()
-      stocks.forEach((s) => stockMap.set(s.StockCode, s))
+      stocks.forEach((s) => stockMap.set(s.stockcode, s))
 
       const computed: ExtendedProductPricing[] = items.map((item) => {
         // Find all raw materials linked to this specific bouquet
-        const itemRecipe = details.filter((d) => d.ItemCode === item.ItemCode)
+        const itemRecipe = details.filter((d) => d.itemcode === item.itemcode)
 
         let totalCost = 0
         const recipeSummary: { stockName: string; quantity: number; unitPrice: number }[] = []
 
         itemRecipe.forEach((detail) => {
-          const stock = stockMap.get(detail.StockCode)
-          const unitPrice = stock?.UnitPrice || 0
-          totalCost += unitPrice * detail.Quantity
+          const stock = stockMap.get(detail.stockcode)
+          const unitPrice = stock?.unitprice || 0
+          totalCost += unitPrice * detail.quantity
 
           if (stock) {
             recipeSummary.push({
-              stockName: stock.StockName,
-              quantity: detail.Quantity,
+              stockName: stock.stockname,
+              quantity: detail.quantity,
               unitPrice: unitPrice,
             })
           }
@@ -107,13 +107,13 @@ export default function PricingEnginePage() {
 
     setIsSaving(itemCode)
     const { error } = await supabase
-      .from('ItemMaster')
+      .from('itemmaster')
       .update({
-        ItemPrice: newPrice,
-        UpdatedOn: new Date().toISOString(),
-        UpdatedBy: 'Admin',
+        itemprice: newPrice,
+        updatedby: 'Admin',
+        updatedon: new Date().toISOString(),
       })
-      .eq('ItemCode', itemCode)
+      .eq('itemcode', itemCode)
 
     if (error) {
       alert('Failed to update price: ' + error.message)
@@ -185,28 +185,28 @@ export default function PricingEnginePage() {
             <tbody className="divide-y divide-gray-200 bg-white">
               {pricingData.map((item) => {
                 const currentEditVal =
-                  editingPrices[item.ItemCode] !== undefined
-                    ? editingPrices[item.ItemCode]
-                    : item.ItemPrice
+                  editingPrices[item.itemcode] !== undefined
+                    ? editingPrices[item.itemcode]
+                    : item.itemprice
                 const profitMargin = currentEditVal - item.calculatedCostPrice
 
                 return (
-                  <tr key={item.ItemCode} className="hover:bg-gray-50 transition-colors">
+                  <tr key={item.itemcode} className="hover:bg-gray-50 transition-colors">
                     {/* Item Name & Code */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        {item.ImageUrl ? (
+                        {item.imageurl ? (
                           <img
-                            src={item.ImageUrl}
-                            alt={item.ItemName}
+                            src={item.imageurl}
+                            alt={item.itemname}
                             className="h-12 w-12 rounded-lg object-cover shadow-sm"
                           />
                         ) : (
                           <div className="h-12 w-12 rounded-lg bg-gray-100" />
                         )}
                         <div>
-                          <div className="font-bold text-gray-900">{item.ItemName}</div>
-                          <div className="text-xs text-gray-500">{item.ItemCode}</div>
+                          <div className="font-bold text-gray-900">{item.itemname}</div>
+                          <div className="text-xs text-gray-500">{item.itemcode}</div>
                         </div>
                       </div>
                     </td>
@@ -239,7 +239,7 @@ export default function PricingEnginePage() {
                         </span>
                         <button
                           onClick={() =>
-                            handleApplySuggestedPrice(item.ItemCode, item.suggestedPrice)
+                            handleApplySuggestedPrice(item.itemcode, item.suggestedPrice)
                           }
                           className="rounded bg-pink-100 px-2 py-1 text-[10px] font-bold text-pink-700 hover:bg-pink-200 transition-colors"
                           title="Use suggested price as input value"
@@ -261,7 +261,7 @@ export default function PricingEnginePage() {
                             step="0.01"
                             value={currentEditVal}
                             placeholder={`Suggested: ${item.suggestedPrice.toFixed(2)}`}
-                            onChange={(e) => handlePriceInputChange(item.ItemCode, e.target.value)}
+                            onChange={(e) => handlePriceInputChange(item.itemcode, e.target.value)}
                             className="w-32 rounded-md border border-gray-300 py-1.5 pl-10 pr-3 text-sm font-bold text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                           />
                         </div>
@@ -278,11 +278,11 @@ export default function PricingEnginePage() {
                     {/* Save Button */}
                     <td className="px-6 py-4 text-right">
                       <button
-                        onClick={() => handleSavePrice(item.ItemCode)}
-                        disabled={isSaving === item.ItemCode}
+                        onClick={() => handleSavePrice(item.itemcode)}
+                        disabled={isSaving === item.itemcode}
                         className="rounded bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-50 transition-colors"
                       >
-                        {isSaving === item.ItemCode ? 'Saving...' : 'Update Price'}
+                        {isSaving === item.itemcode ? 'Saving...' : 'Update Price'}
                       </button>
                     </td>
                   </tr>

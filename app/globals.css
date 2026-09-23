@@ -5,6 +5,8 @@
   --navbar-text: #665B4D;
   --navbar-hover-text: #A8B59A;
   --background: #FFFDF8;
+  --button-background: #B8CCD8;
+  --button-hover-background: #A8B59A;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -29,5 +31,21 @@ body {
 
   .text-navbar:hover {
     color: var(--navbar-hover-text);
+  }
+
+  .button {
+    @apply bg-(--button-background) border rounded-full cursor-pointer;
+  }
+
+  .button:hover {
+    background-color: var(--button-hover-background);
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+
+  .form-input {
+    @apply mt-1 w-full rounded border p-2 text-gray-900;
   }
 }
