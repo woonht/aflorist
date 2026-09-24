@@ -22,9 +22,11 @@ export default function ProductManagement() {
 
   // Quick-update stock quantities on input blur
   const handleUpdateStock = async (stockCode: string, newQty: number) => {
+    const { data: { user } } = await supabase.auth.getUser()
+
     await supabase.from('stockmaster').update({ 
         stockquantity: newQty,
-        updatedby: 'Admin',
+        updatedby: user?.app_metadata.username,
         updatedon: new Date().toISOString()
     }).eq('stockcode', stockCode)
     fetchData()

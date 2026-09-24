@@ -17,7 +17,6 @@ export default function NewProductPage() {
   const [itemPrice, setItemPrice] = useState<number>(0)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [unitPrice, setUnitPrice] = useState('')
-  const [createdBy, setCreatedBy] = useState('')
   
   // Raw Materials (Bill of Materials) State
   const [availableStock, setAvailableStock] = useState<StockMaster[]>([])
@@ -46,6 +45,7 @@ export default function NewProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
     
     try {
       // 1. Upload Image to Supabase Storage bucket created in Phase 2[cite: 4]
@@ -72,7 +72,7 @@ export default function NewProductPage() {
         itemname: itemName,
         itemprice: itemPrice,
         imageurl: imageUrl,
-        createdby: 'Admin', // Static auth attribution
+        createdby: user?.app_metadata.username,
         createdon: new Date().toISOString()
       })
       
@@ -85,7 +85,7 @@ export default function NewProductPage() {
           itemcode: itemCode,
           stockcode: m.stockCode,
           quantity: m.quantity,
-          createdby: 'Admin',
+          createdby: user?.app_metadata.username,
           createdon: new Date().toISOString()
         }))
         
@@ -135,10 +135,6 @@ export default function NewProductPage() {
           <div>
             <label className="form-label">Unit Price (RM)</label>
             <input type="text" required value={unitPrice} onChange={e => setUnitPrice(e.target.value)} className="form-input" />
-          </div>
-          <div>
-            <label className="form-label">Created By</label>
-            <input type="text" required value={createdBy} onChange={e => setCreatedBy(e.target.value)} className="form-input" />
           </div>
         </div>
 

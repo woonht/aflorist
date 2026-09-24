@@ -22,10 +22,12 @@ export default function ProductManagement() {
 
   // Safely hide product without destroying historical order data
   const handleArchiveProduct = async (itemCode: string) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    
     if (!confirm('Are you sure you want to archive this bouquet? It will disappear from the storefront.')) return
     await supabase.from('itemmaster').update({ 
       isarchived: true,
-      updatedby: 'Admin',
+      updatedby: user?.app_metadata.username,
       updatedon: new Date().toISOString()
     }).eq('itemCode', itemCode)
     fetchData()

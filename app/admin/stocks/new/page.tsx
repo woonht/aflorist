@@ -13,13 +13,13 @@ export default function NewStockPage() {
     const [stockCategory, setStockCategory] = useState<string|null>(null)
     const [stockQuantity, setStockQuantity] = useState('')
     const [unitPrice, setUnitPrice] = useState<number>(0.00)
-    const [createdBy, setCreatedBy] = useState('')
 
     const [isLoading, setIsLoading] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
+        const { data: { user } } = await supabase.auth.getUser()
 
         try {
             const { error : itemError } = await supabase.from('stockmaster').insert({
@@ -28,7 +28,7 @@ export default function NewStockPage() {
                 stockcategory: stockCategory,
                 stockquantity: stockQuantity,
                 unitprice: unitPrice,
-                createdby: createdBy,
+                createdby: user?.app_metadata.username,
                 createdon: new Date().toISOString()
             })
 
@@ -72,10 +72,6 @@ export default function NewStockPage() {
                         <div>
                             <label className="form-label">Unit Price (RM)</label>
                             <input className="form-input" type="number" step={0.01} min={0.00} required value={unitPrice} onChange={e => setUnitPrice(parseFloat(e.target.value))}></input>
-                        </div>
-                        <div>
-                            <label className="form-label">Created By</label>
-                            <input className="form-input" type="text" required value={createdBy} onChange={e => setCreatedBy(e.target.value)}></input>
                         </div>
                     </div>
                     <button className="button w-full py-3 font-semibold text-white disabled:opacity-50" type="submit" disabled={isLoading}>

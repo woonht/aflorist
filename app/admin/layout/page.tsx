@@ -25,11 +25,11 @@ export default function LayoutArranger() {
         
         // Map database Grid columns to React-Grid-Layout specific parameters
         const initialLayout = data.map((p) => ({
-          i: p.ItemCode,
-          x: p.GridX || 0,
-          y: p.GridY || 0,
-          w: p.GridW || 1, // 1 = Standard width, 2 = Double width
-          h: p.GridH || 1, 
+          i: p.itemcode,
+          x: p.gridx || 0,
+          y: p.gridy || 0,
+          w: p.gridw || 1, // 1 = Standard width, 2 = Double width
+          h: p.gridh || 1, 
         }))
         setLayout(initialLayout)
       }
@@ -44,14 +44,17 @@ export default function LayoutArranger() {
 
   // Loop through items and update PostgreSQL database coordinates
   const saveLayoutToDatabase = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
     setIsSaving(true)
     try {
       for (const item of layout) {
         await supabase.from('itemmaster').update({
-          GridX: item.x,
-          GridY: item.y,
-          GridW: item.w,
-          GridH: item.h,
+          gridx: item.x,
+          gridy: item.y,
+          gridw: item.w,
+          gridh: item.h,
+          updatedby: user?.app_metadata.username,
+          updatedon: new Date().toISOString()
         }).eq('itemcode', item.i)
       }
       alert('Storefront layout updated successfully!')

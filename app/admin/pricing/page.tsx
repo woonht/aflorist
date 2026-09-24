@@ -102,6 +102,7 @@ export default function PricingEnginePage() {
 
   // Save new selling price to ItemMaster in Supabase[cite: 3]
   const handleSavePrice = async (itemCode: string) => {
+    const { data : { user } } = await supabase.auth.getUser()
     const newPrice = editingPrices[itemCode]
     if (newPrice === undefined) return
 
@@ -110,7 +111,7 @@ export default function PricingEnginePage() {
       .from('itemmaster')
       .update({
         itemprice: newPrice,
-        updatedby: 'Admin',
+        updatedby: user?.app_metadata.username,
         updatedon: new Date().toISOString(),
       })
       .eq('itemcode', itemCode)
