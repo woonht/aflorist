@@ -1,7 +1,7 @@
 export interface StockMaster {
   stockcode: string;
   stockname: string;
-  stockcategory: string | null;
+  stockcategory: string;
   stockquantity: number;
   unitprice: number;
   createdby: string;
@@ -14,7 +14,7 @@ export interface StockMaster {
 export interface ItemMaster {
   itemcode: string;
   itemname: string;
-  itemcategory: string | null;
+  itemcategory: string;
   imageurl: string | null;
   unitprice: number;
   itemprice: number;

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client' // Built in Phase 1[cite: 1]
 import { StockMaster } from '@/types/database' // Defined in Phase 2[cite: 4]
@@ -9,25 +9,40 @@ import { v4 as uuidv4 } from 'uuid'
 export default function NewProductPage() {
   const router = useRouter()
   const supabase = createClient()
+  const menuRef = useRef<HTMLDivElement>(null)
   
   // Product Form State
   const [itemCode, setItemCode] = useState('')
   const [itemName, setItemName] = useState('')
-  const [itemCategory, setItemCategory] = useState<string | null>(null)
+  const [itemCategory, setItemCategory] = useState('')
   const [itemPrice, setItemPrice] = useState<number>(0)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [unitPrice, setUnitPrice] = useState('')
   
   // Raw Materials (Bill of Materials) State
+  const [availableItemCategory, setAvailableItemCategory] = useState<{ itemcategory: string }[]>([])
   const [availableStock, setAvailableStock] = useState<StockMaster[]>([])
   const [selectedMaterials, setSelectedMaterials] = useState<{ stockCode: string, quantity: number }[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+
+  const filteredItemCategory = availableItemCategory?.filter((cat) => cat.itemcategory.toLowerCase().includes(itemCategory.toLowerCase()))
   
   // Fetch available raw materials on page load
   useEffect(() => {
     async function loadStock() {
       const { data } = await supabase.from('stockmaster').select('*').eq('isarchived', false)
       if (data) setAvailableStock(data)
+
+      const { data: category } = await supabase.from('itemmaster').select('itemcategory').eq('isarchived', false)
+      if (category) {
+        const distinctCategory = Array.from(
+          new Map(
+            category.map((cat) => [cat.itemcategory, cat])
+          ).values()
+        )
+        setAvailableItemCategory(distinctCategory)
+      } 
     }
     loadStock()
   }, [supabase])
@@ -102,6 +117,22 @@ export default function NewProductPage() {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
   
   return (
     <div className="mx-auto max-w-3xl p-8">
@@ -121,9 +152,25 @@ export default function NewProductPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
+          <div className='relative' ref={menuRef}>
             <label className="form-label">Item Category</label>
-            <input type="text" required value={itemCategory || ''} onChange={e => setItemCategory(e.target.value)} className="form-input" />
+            <input type="text" required value={itemCategory} onChange={e => { setItemCategory(e.target.value), setIsOpen(true) }} onFocus={() => setIsOpen(true)} className="form-input" />
+            { isOpen && filteredItemCategory.length > 0 && (
+              <ul className="absolute z-10 mt-1 max-h-48 w-full rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                {filteredItemCategory.map((cat, index) => (
+                  <li
+                    key={index}
+                    onClick={() => {
+                      setItemCategory(cat.itemcategory) // Save selection
+                      setIsOpen(false) // Close menu
+                    }}
+                    className="cursor-pointer px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-700 transition-colors"
+                  >
+                    {cat.itemcategory}
+                  </li>
+                ))}
+              </ul>
+            )}  
           </div>
           <div>
             <label className="form-label">Selling Price (RM)</label>
@@ -168,7 +215,7 @@ export default function NewProductPage() {
 
         {/* Dynamic Raw Materials Section */}
         <div className="border-t pt-4">
-          <h3 className="mb-2 text-lg font-semibold text-gray-900">Stock Used</h3>
+          <h3 className="mb-2 text-lg font-semibold text-gray-900">Stock Using</h3>
           {selectedMaterials.map((mat, index) => (
             <div key={index} className="mb-3 flex items-center gap-4">
               <select 
