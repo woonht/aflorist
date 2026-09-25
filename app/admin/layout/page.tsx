@@ -53,7 +53,7 @@ export default function LayoutArranger() {
           gridy: item.y,
           gridw: item.w,
           gridh: item.h,
-          updatedby: user?.app_metadata.username,
+          updatedby: user?.user_metadata.username,
           updatedon: new Date().toISOString()
         }).eq('itemcode', item.i)
       }

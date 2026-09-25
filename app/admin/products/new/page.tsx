@@ -75,7 +75,7 @@ export default function NewProductPage() {
         if (uploadError) throw new Error('Image upload failed: ' + uploadError.message)
         
         const { data: publicUrlData } = supabase.storage
-          .from('product-images')
+          .from('item-images')
           .getPublicUrl(`public/${fileName}`)
           
         imageUrl = publicUrlData.publicUrl
@@ -87,7 +87,7 @@ export default function NewProductPage() {
         itemname: itemName,
         itemprice: itemPrice,
         imageurl: imageUrl,
-        createdby: user?.app_metadata.username,
+        createdby: user?.user_metadata.username,
         createdon: new Date().toISOString()
       })
       
@@ -100,7 +100,7 @@ export default function NewProductPage() {
           itemcode: itemCode,
           stockcode: m.stockCode,
           quantity: m.quantity,
-          createdby: user?.app_metadata.username,
+          createdby: user?.user_metadata.username,
           createdon: new Date().toISOString()
         }))
         

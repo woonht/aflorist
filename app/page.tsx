@@ -12,7 +12,7 @@ export default async function HomePage() {
   // 1. Fetch public flower products from Supabase ItemMaster table[cite: 3, 6]
   const { data: products, error } = await supabase
     .from('itemmaster')
-    .select('ItemCode:itemcode, ItemName:itemname, ImageUrl:imageurl, ItemPrice:itemprice, GridX:gridx, GridY:gridy, GridW:gridw, GridH:gridh')
+    .select('itemcode, itemname, imageurl, itemprice, gridx, gridy, gridw, gridh')
     .eq('isarchived', false)
     .order('createdon', { ascending: false })
 

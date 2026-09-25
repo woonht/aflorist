@@ -24,17 +24,17 @@ export default function ProductManagement() {
   const handleArchiveProduct = async (itemCode: string) => {
     const { data: { user } } = await supabase.auth.getUser()
     
-    if (!confirm('Are you sure you want to archive this bouquet? It will disappear from the storefront.')) return
+    if (!confirm('Are you sure you want to archive this product? It will disappear from the storefront.')) return
     await supabase.from('itemmaster').update({ 
       isarchived: true,
-      updatedby: user?.app_metadata.username,
+      updatedby: user?.user_metadata.username,
       updatedon: new Date().toISOString()
     }).eq('itemCode', itemCode)
     fetchData()
   }
 
   return (
-    <div className="mx-auto max-w-6xl p-8">
+    <div className="mx-auto max-w-7xl p-8">
 
       {/* Product Management Table */}
       <div className='flex gap-4 mb-4 items-center justify-between'>
@@ -47,9 +47,10 @@ export default function ProductManagement() {
         <table className="min-w-full divide-y divide-gray-300">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Image</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Item Code</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Product Image</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Product Code</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Product Name</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Product Category</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Price</th>
               <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">Action</th>
             </tr>
@@ -66,9 +67,10 @@ export default function ProductManagement() {
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{product.itemcode}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{product.itemname}</td>
+                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{product.itemcategory}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">RM {product.itemprice.toFixed(2)}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                  <button onClick={() => handleArchiveProduct(product.itemcode)} className="text-red-600 hover:text-red-900">
+                  <button onClick={() => handleArchiveProduct(product.itemcode)} className="bg-red-600 hover:bg-red-900 text-white font-semibold w-[70%] py-3 rounded-full cursor-pointer">
                     Archive (Hide)
                   </button>
                 </td>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/utils/supabase/client"
+import { v4 as uuidv4 } from 'uuid'
 
 export default function NewStockPage() {
     const router = useRouter()
@@ -59,13 +60,31 @@ export default function NewStockPage() {
         const { data: { user } } = await supabase.auth.getUser()
 
         try {
+            let imageUrl = ''
+            if (imageFile) {
+                const fileExt = imageFile.name.split('.').pop()
+                const filename = `${uuidv4()}.${fileExt}`
+                const { error: uploadError } = await supabase.storage
+                    .from('item-images')
+                    .upload(`public/${filename}`, imageFile)
+
+                if (uploadError) throw new Error ('Image upload failed: ' + uploadError.message)
+                
+                const { data: publicUrlData } = supabase.storage
+                    .from('item-iamges')
+                    .getPublicUrl(`public/${filename}`)
+
+                imageUrl = publicUrlData.publicUrl
+            }
+
             const { error : itemError } = await supabase.from('stockmaster').insert({
                 stockcode: stockCode,
                 stockname: stockName,
                 stockcategory: stockCategory,
                 stockquantity: stockQuantity,
                 unitprice: unitPrice,
-                createdby: user?.app_metadata.username,
+                imageurl: imageUrl,
+                createdby: user?.user_metadata.username,
                 createdon: new Date().toISOString()
             })
 

@@ -111,7 +111,7 @@ export default function PricingEnginePage() {
       .from('itemmaster')
       .update({
         itemprice: newPrice,
-        updatedby: user?.app_metadata.username,
+        updatedby: user?.user_metadata.username,
         updatedon: new Date().toISOString(),
       })
       .eq('itemcode', itemCode)

@@ -20,12 +20,12 @@ export default function ProductGrid({ products, phoneNumber }: ProductGridProps)
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 auto-rows-340px">
       {products.map((product) => (
         <ProductCard
-          key={product.ItemCode}
-          name={product.ItemName}
-          imageUrl={product.ImageUrl || ''}
-          sellingPrice={product.ItemPrice}
-          gridW={product.GridW || 1}
-          gridH={product.GridH || 1}
+          key={product.itemcode}
+          name={product.itemname}
+          imageUrl={product.imageurl || ''}
+          sellingPrice={product.itemprice}
+          gridW={product.gridw || 1}
+          gridH={product.gridh || 1}
           phoneNumber={phoneNumber}
         />
       ))}
