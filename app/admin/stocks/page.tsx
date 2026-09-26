@@ -28,7 +28,7 @@ function StockRow ({ item, handleUpdateStock, handleArchiveProduct }: { item: an
           min={0}
           value={tempQty}
           // onBlur={(e) => handleUpdateStock(item.stockcode, Number(e.target.value))}
-          onChange={(e) => setTempQty(parseFloat(e.target.value))}
+          onChange={(e) => setTempQty(isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value))}
           className="w-24 rounded border p-1 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
         />
       </td>
@@ -39,7 +39,7 @@ function StockRow ({ item, handleUpdateStock, handleArchiveProduct }: { item: an
           step={0.01}
           value={tempPrice} 
           // onBlur={(e) => handleUpdateStock(item.stockcode, Number(e.target.value))}
-          onChange={(e) => setTempPrice(parseFloat(e.target.value))}
+          onChange={(e) => setTempPrice(isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value))}
           className="w-24 rounded border p-1 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
         />
       </td>
