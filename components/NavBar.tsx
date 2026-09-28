@@ -53,6 +53,9 @@ export default async function Navbar() {
                                 <Link href="/admin/layout" className="text-navbar">
                                     Layout
                                 </Link>
+                                <Link href="/admin/orders" className="text-navbar">
+                                    Orders
+                                </Link>
                                 <Link href="/admin/pricing" className="text-navbar">
                                     Pricing
                                 </Link>

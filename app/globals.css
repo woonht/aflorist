@@ -34,7 +34,7 @@ body {
   }
 
   .button {
-    @apply bg-(--button-background) border rounded-full cursor-pointer;
+    @apply bg-(--button-background) font-bold text-white border rounded-full cursor-pointer;
   }
 
   .button:hover {

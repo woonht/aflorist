@@ -93,4 +93,6 @@ export interface SalesOrderDetail {
   updatedby: string | null;
   updatedon: string | null;
   isarchived: boolean;
+  remark: string | null;
+  giftcard: boolean;
 }
