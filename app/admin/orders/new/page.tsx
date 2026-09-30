@@ -60,7 +60,6 @@ export default function NewOrderPage() {
 
   // Calculate the live total order price
   const totalOrderPrice = orderItems.reduce((sum, current) => sum + (current.item.itemprice * current.qty), 0)
-  const totalBouquet = orderItems.reduce((sum, current) => sum + (current.qty), 0)
 
   // Submit everything to Supabase
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,8 +110,8 @@ export default function NewOrderPage() {
     const { error: detailsError } = await supabase.from('salesorderdetails').insert(details)
 
     if (detailsError) {
-      const { error: headerError } = await supabase.from('salesorderheaders').delete().eq('ordernumber', orderNumber)
-      alert('Error saving order items: ' + detailsError.message + `\nError deleting order header: ${headerError ? headerError?.message : 'N/A'}`)
+      const { error: headerDeleteError } = await supabase.from('salesorderheaders').delete().eq('ordernumber', orderNumber)
+      alert('Error saving order items: ' + detailsError.message + `\nError deleting order header: ${headerDeleteError ? headerDeleteError.message : 'N/A'}`)
     } else {
       alert('Order successfully created!')
       router.push('/admin/orders') // Send admin to the management dashboard

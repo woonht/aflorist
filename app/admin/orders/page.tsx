@@ -204,13 +204,13 @@ export default function OrderManagementPage() {
                     </div>
                     <div className='grid grid-cols-2'>
                       <button 
-                        onClick={() => router.push("/admin/orders/edit")}
+                        onClick={() => router.push(`/admin/orders/edit?OrderNumber=${order.ordernumber}`)}
                         className="rounded bg-[#B8CCD8] px-4 py-1.5 text-xs font-bold text-white hover:bg-blue-300 transition-colors"
                       >
                         Edit
                       </button>
                       <button 
-                        onClick={() => router.push("/admin/orders/view")}
+                        onClick={() => router.push(`/admin/orders/view?OrderNumber=${order.ordernumber}`)}
                         className="rounded bg-[#D4B483] px-4 py-1.5 text-xs font-bold text-white hover:bg-amber-500 transition-colors"
                       >
                         View
