@@ -23,31 +23,6 @@ export default function OrderManagementPage() {
   const fetchOrders = async () => {
     setIsLoading(true)
 
-    const twentyFourHoursAgo = new Date(Date.now() - (24 * 60 * 60 * 1000)).toISOString()
-
-    const { error: errorHeaderNewToPendingOrder } = await supabase
-      .from('salesorderheaders')
-      .update({ statuscode: 'P'})
-      .eq('statuscode', 'N')
-      .eq('isarchived', false)
-      .lte('createdon', twentyFourHoursAgo)
-
-    if(errorHeaderNewToPendingOrder) {
-      alert('Failed to convert status code from "N" to "P": ' + errorHeaderNewToPendingOrder.message)
-    }
-
-    const { error: errorDetailNewToPendingOrder } = await supabase
-      .from('salesorderdetails')
-      .update({ statuscode: 'P'})
-      .eq('statuscode', 'N')
-      .eq('isarchived', false)
-      .lte('createdon', twentyFourHoursAgo)
-
-      if(errorHeaderNewToPendingOrder) {
-        alert('Failed to convert status code from "N" to "P": ' + errorDetailNewToPendingOrder?.message)
-      }
-
-
     // 1. Fetch Pending Orders: Sort chronologically so the nearest deadline is at the top[cite: 1]
     const { data: newOrder } = await supabase
       .from('salesorderheaders')
@@ -86,6 +61,27 @@ export default function OrderManagementPage() {
   useEffect(() => {
     fetchOrders()
   }, [])
+
+  const handleMarkPending = async (orderNumber: string) => {
+    if (!confirm(`Are you sure you want to pending order ${orderNumber}?`)) return
+    
+    const { data: { user } } = await supabase.auth.getUser()
+    const now = new Date().toISOString()
+
+    // Update SalesOrderHeaders[cite: 7]
+    await supabase
+      .from('salesorderheaders')
+      .update({ statuscode: 'P', updatedon: now, updatedby: user?.user_metadata.username })
+      .eq('ordernumber', orderNumber)
+      
+    // Update SalesOrderDetails[cite: 7]
+    await supabase
+      .from('salesorderdetails')
+      .update({ statuscode: 'P', updatedon: now, updatedby: user?.user_metadata.username })
+      .eq('ordernumber', orderNumber)
+
+    fetchOrders() // Instantly refresh the tables
+  }
 
   // Marks both the header and all individual line items as Completed ('C')
   const handleMarkCompleted = async (orderNumber: string) => {
@@ -189,12 +185,21 @@ export default function OrderManagementPage() {
                 {!isCompleted && (
                   <td className="px-6 py-4 text-right">
                     <div className='grid grid-cols-2'>
-                      <button 
-                        onClick={() => handleMarkCompleted(order.ordernumber)}
-                        className="rounded bg-[#A8B59A] px-4 py-1.5 text-xs font-bold text-white hover:bg-green-500 transition-colors"
-                      >
-                        Complete
-                      </button>
+                      {activeTab == 'new' ? (
+                        <button 
+                          onClick={() => handleMarkPending(order.ordernumber)}
+                          className="rounded bg-[#A8B59A] px-4 py-1.5 text-xs font-bold text-white hover:bg-green-500 transition-colors"
+                        >
+                          Pending
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => handleMarkCompleted(order.ordernumber)}
+                          className="rounded bg-[#A8B59A] px-4 py-1.5 text-xs font-bold text-white hover:bg-green-500 transition-colors"
+                        >
+                          Complete
+                        </button>
+                      )}
                       <button 
                         onClick={() => handleCancelOrder(order.ordernumber)}
                         className="rounded bg-[#EBA7A0] px-4 py-1.5 text-xs font-bold text-white hover:bg-red-400 transition-colors"

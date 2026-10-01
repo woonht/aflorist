@@ -65,13 +65,13 @@ export default function NewStockPage() {
                 const fileExt = imageFile.name.split('.').pop()
                 const filename = `${uuidv4()}.${fileExt}`
                 const { error: uploadError } = await supabase.storage
-                    .from('item-images')
+                    .from('stock-images')
                     .upload(`public/${filename}`, imageFile)
 
                 if (uploadError) throw new Error ('Image upload failed: ' + uploadError.message)
                 
                 const { data: publicUrlData } = supabase.storage
-                    .from('item-iamges')
+                    .from('stock-images')
                     .getPublicUrl(`public/${filename}`)
 
                 imageUrl = publicUrlData.publicUrl
