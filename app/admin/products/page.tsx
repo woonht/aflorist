@@ -29,7 +29,7 @@ export default function ProductManagement() {
       isarchived: true,
       updatedby: user?.user_metadata.username,
       updatedon: new Date().toISOString()
-    }).eq('itemCode', itemCode)
+    }).eq('itemcode', itemCode)
     fetchData()
   }
 
@@ -40,7 +40,7 @@ export default function ProductManagement() {
       <div className='flex gap-4 mb-4 items-center justify-between'>
         <h2 className="text-xl font-semibold text-gray-800">Active Products</h2>
         <button className='button p-2' onClick={() => router.push('/admin/products/new')}>
-          Add New Product
+          + New Product
         </button>
       </div>
       <div className="overflow-hidden rounded-lg shadow ring-1 ring-black ring-opacity-5">
@@ -48,7 +48,6 @@ export default function ProductManagement() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Product Image</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Product Code</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Product Name</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Product Category</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Price</th>
@@ -65,13 +64,12 @@ export default function ProductManagement() {
                     <div className="h-12 w-12 rounded bg-gray-100" />
                   )}
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{product.itemcode}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{product.itemname}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{product.itemcategory}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">RM {product.itemprice.toFixed(2)}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                   <button onClick={() => handleArchiveProduct(product.itemcode)} className="bg-red-600 hover:bg-red-900 text-white font-semibold w-[70%] py-3 rounded-full cursor-pointer">
-                    Archive (Hide)
+                    Delete
                   </button>
                 </td>
               </tr>

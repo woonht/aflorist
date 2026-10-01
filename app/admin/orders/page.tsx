@@ -236,7 +236,7 @@ export default function OrderManagementPage() {
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Order Management</h1>
         <Link href="/admin/orders/new" className="button p-2">
-          + New WhatsApp Order
+          + New Order
         </Link>
       </div>
 

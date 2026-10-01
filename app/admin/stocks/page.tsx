@@ -29,7 +29,7 @@ function StockRow ({ item, handleUpdateStock, handleArchiveProduct }: { item: an
           value={tempQty}
           // onBlur={(e) => handleUpdateStock(item.stockcode, Number(e.target.value))}
           onChange={(e) => setTempQty(isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value))}
-          className="w-24 rounded border p-1 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+          className="w-20 rounded border p-1 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
         />
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-sm">
@@ -40,15 +40,15 @@ function StockRow ({ item, handleUpdateStock, handleArchiveProduct }: { item: an
           value={tempPrice} 
           // onBlur={(e) => handleUpdateStock(item.stockcode, Number(e.target.value))}
           onChange={(e) => setTempPrice(isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value))}
-          className="w-24 rounded border p-1 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+          className="w-20 rounded border p-1 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
         />
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
         <div className='flex gap-4'>
-          <button onClick={() => handleArchiveProduct(item.stockcode)} className="bg-red-600 hover:bg-red-900 text-white font-semibold w-[65%] py-3 rounded-full cursor-pointer">
-            Archive (Hide)
+          <button onClick={() => handleArchiveProduct(item.stockcode)} className="bg-red-600 hover:bg-red-900 text-white font-semibold w-[55%] py-3 rounded-full cursor-pointer">
+            Delete
           </button>
-          <button onClick={() => {handleUpdateStock(item.stockcode, tempQty, tempPrice), console.log(isChanged)}} className="bg-[#B8CCD8] hover:bg-[#A8B59A] rounded-full cursor-pointer font-semibold text-white w-[35%] py-3 disabled:opacity-50 disabled:cursor-default disabled:hover:bg-[#B8CCD8]" disabled={!isChanged}>
+          <button onClick={() => {handleUpdateStock(item.stockcode, tempQty, tempPrice), console.log(isChanged)}} className="bg-[#B8CCD8] hover:bg-[#A8B59A] rounded-full cursor-pointer font-semibold text-white w-[45%] py-3 disabled:opacity-50 disabled:cursor-default disabled:hover:bg-[#B8CCD8]" disabled={!isChanged}>
             Save
           </button>
         </div>
@@ -94,7 +94,7 @@ export default function ProductManagement() {
       isarchived: true,
       updatedby: user?.user_metadata.username,
       updatedon: new Date().toISOString()
-    }).eq('stockCode', stockCode)
+    }).eq('stockcode', stockCode)
     fetchData()
   }
 
@@ -105,20 +105,20 @@ export default function ProductManagement() {
       <div className='flex gap-4 mb-4 items-center justify-between'>
         <h2 className="text-xl font-semibold text-gray-800">Stocks List</h2>
         <button className='button p-2' onClick={() => router.push('/admin/stocks/new')}>
-          Add New Stock
+          + New Stock
         </button>
       </div>
       <div className="mb-10 overflow-hidden rounded-lg shadow ring-1 ring-black ring-opacity-5">
-        <table className="min-w-full divide-y divide-gray-300">
+        <table className="min-w-full divide-y divide-gray-300 table-fixed">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Stock Image</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Stock Code</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Stock Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Stock Category</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Stock Quantity</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Unit Price</th>
-              <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">Action</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 w-[10%]">Stock Image</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 w-[10%]">Stock Code</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 w-[25%]">Stock Name</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 w-[15%]">Stock Category</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 w-[15%]">Stock Quantity</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 w-[5%]">Unit Price</th>
+              <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900 w-[20%]">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">

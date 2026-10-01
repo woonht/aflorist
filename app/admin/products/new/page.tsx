@@ -47,6 +47,8 @@ export default function NewProductPage() {
         )
         setAvailableItemCategory(distinctCategory)
       } 
+      const newItemCode = `BQT-${Date.now()}`
+      setItemCode(newItemCode)
     }
     loadStock()
   }, [supabase])
@@ -170,18 +172,18 @@ export default function NewProductPage() {
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="form-label">Item Code</label>
-              <input type="text" required value={itemCode} onChange={e => setItemCode(e.target.value)} className="form-input" />
+              <label className="form-label">Product Code</label>
+              <input type="text" required value={itemCode} className="form-input bg-gray-200" disabled />
             </div>
             <div>
-              <label className="form-label">Bouquet Name</label>
+              <label className="form-label">Product Name</label>
               <input type="text" required value={itemName} onChange={e => setItemName(e.target.value)} className="form-input" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className='relative' ref={menuRef}>
-              <label className="form-label">Item Category</label>
+              <label className="form-label">Product Category</label>
               <input type="text" required value={itemCategory} onChange={e => { setItemCategory(e.target.value), setIsOpen(true) }} onFocus={() => setIsOpen(true)} className="form-input" />
               { isOpen && filteredItemCategory.length > 0 && (
                 <ul className="absolute z-10 mt-1 max-h-48 w-full rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
@@ -223,7 +225,7 @@ export default function NewProductPage() {
           </div>
 
           <div>
-            <label className="form-label mb-2">Bouquet Image</label>
+            <label className="form-label mb-2">Product Image</label>
             <div className="flex items-center justify-center w-full">
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-[#EBA7A0] transition-colors">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
