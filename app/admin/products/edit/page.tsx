@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client' // Built in Phase 1[cite: 1]
 import { StockMaster } from '@/types/database' // Defined in Phase 2[cite: 4]
 import { v4 as uuidv4 } from 'uuid'
@@ -10,6 +10,9 @@ export default function NewProductPage() {
   const router = useRouter()
   const supabase = createClient()
   const menuRef = useRef<HTMLDivElement>(null)
+  const searchParams = useSearchParams()
+  
+  const ItemCode = searchParams.get("ItemCode") 
   
   // Product Form State
   const [itemCode, setItemCode] = useState('')
@@ -17,7 +20,6 @@ export default function NewProductPage() {
   const [itemCategory, setItemCategory] = useState('')
   const [itemPrice, setItemPrice] = useState<number>(0)
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [unitPrice, setUnitPrice] = useState<number[]>([])
   const [totalUnitPrice, setTotalUnitPrice] = useState(0)
   const [suggestedPrice, setSuggestedPrice] = useState(0)
   const [markupMultiplier, setMarkupMultiplier] = useState(3)
@@ -26,12 +28,42 @@ export default function NewProductPage() {
   const [availableItemCategory, setAvailableItemCategory] = useState<{ itemcategory: string }[]>([])
   const [availableStock, setAvailableStock] = useState<StockMaster[]>([])
   const [selectedMaterials, setSelectedMaterials] = useState<{ stockCode: string, quantity: number }[]>([])
+  const [originalImageFile, setOriginalImageFile] = useState('')
 
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
   const filteredItemCategory = availableItemCategory?.filter((cat) => cat.itemcategory.toLowerCase().includes(itemCategory.toLowerCase()))
   
+  const fetchCurrentItem = async () => {
+    const { data } = await supabase
+        .from('itemmaster')
+        .select('*')
+        .eq('isarchived', false)
+        .eq('itemcode', ItemCode)
+        .single()
+
+    if(data) {
+      setItemCode(data.itemcode)
+      setItemName(data.itemname)
+      setItemCategory(data.itemcategory)
+      setItemPrice(data.itemprice)
+      setTotalUnitPrice(data.unitprice)
+      setOriginalImageFile(data.imageurl)
+
+      const { data: details } = await supabase
+        .from('itemdetails')
+        .select('*')
+        .eq('isarchived', false)
+        .eq('itemcode', ItemCode)
+
+      if(details) {
+        const itemDetails = details.map((d: any) => ({stockCode: d.stockcode, quantity: d.quantity}))
+        setSelectedMaterials(itemDetails)
+      }
+    }
+  }
+
   // Fetch available raw materials on page load
   useEffect(() => {
     async function loadStock() {
@@ -47,10 +79,9 @@ export default function NewProductPage() {
         )
         setAvailableItemCategory(distinctCategory)
       } 
-      const newItemCode = `BQT-${Date.now()}`
-      setItemCode(newItemCode)
     }
     loadStock()
+    fetchCurrentItem()
   }, [supabase])
   
   const handleAddMaterial = () => {
@@ -63,28 +94,20 @@ export default function NewProductPage() {
     setSelectedMaterials(updated)
   }
   
-  const handleTotalUnitPrice = async (index: number, stockCode: string, quantity: number) => {
-    const { data } = await supabase.from('stockmaster').select('unitprice').eq('stockcode', stockCode).single()
-    
-    if (data){
-      const tempTotalPrice = [...unitPrice]
-      tempTotalPrice[index] = quantity * parseFloat(data.unitprice)
-      setUnitPrice(tempTotalPrice)
-    }
-  }
-
   useEffect(() => {
-    // Calculate the sum of all prices in the array, defaulting to 0 if a slot is empty
-    // reduce() is to reduce the array to one number
-    // sum is the total while the price is the current item
-    // .reduce(..., 0) is to set sum = 0
-    // (price || 0) is to prevent undefined
-    const overallTotal = unitPrice.reduce((sum, price) => sum + (price || 0), 0)
-    
-    // Update your main input field state (e.g., itemPrice)
-    setTotalUnitPrice(overallTotal)
-    setSuggestedPrice(overallTotal * markupMultiplier)
-  }, [unitPrice, markupMultiplier])
+    const total = selectedMaterials.reduce((sum, material) => {
+      const stock = availableStock.find(
+        s => s.stockcode === material.stockCode
+      )
+
+      if (!stock) return sum
+
+      return sum + Number(stock.unitprice) * material.quantity
+    }, 0)
+
+    setTotalUnitPrice(total)
+    setSuggestedPrice(total * markupMultiplier)
+  }, [selectedMaterials, availableStock, markupMultiplier])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -93,7 +116,7 @@ export default function NewProductPage() {
     
     try {
       // 1. Upload Image to Supabase Storage bucket created in Phase 2[cite: 4]
-      let imageUrl = ''
+      let imageUrl = originalImageFile
       if (imageFile) {
         const fileExt = imageFile.name.split('.').pop()
         const fileName = `${uuidv4()}.${fileExt}` // Secure unique naming
@@ -111,32 +134,30 @@ export default function NewProductPage() {
       }
       
       // 2. Insert into ItemMaster[cite: 4]
-      const { error: itemError } = await supabase.from('itemmaster').insert({
-        itemcode: itemCode,
+      const { error: itemError } = await supabase.from('itemmaster').update({
         itemname: itemName,
         itemcategory: itemCategory,
         itemprice: itemPrice,
         unitprice: totalUnitPrice,
         imageurl: imageUrl,
-        createdby: user?.user_metadata.username,
-        createdon: new Date().toISOString()
-      })
+        updatedby: user?.user_metadata.username,
+        updatedon: new Date().toISOString()
+      }).eq('itemcode', ItemCode)
       
-      if (itemError) throw new Error('Product creation failed: ' + itemError.message)
+      if (itemError) throw new Error('Product update failed: ' + itemError.message)
       
       // 3. Link Raw Materials in ItemDetails[cite: 4]
       const materialsToInsert = selectedMaterials
         .filter(m => m.stockCode !== '')
         .map(m => ({
-          itemcode: itemCode,
           stockcode: m.stockCode,
           quantity: m.quantity,
-          createdby: user?.user_metadata.username,
-          createdon: new Date().toISOString()
+          updatedby: user?.user_metadata.username,
+          updatedon: new Date().toISOString()
         }))
         
       if (materialsToInsert.length > 0) {
-        const { error: detailError } = await supabase.from('itemdetails').insert(materialsToInsert)
+        const { error: detailError } = await supabase.from('itemdetails').insert(materialsToInsert).eq('itemcode', ItemCode)
         if (detailError) throw new Error('Failed to link raw materials: ' + detailError.message)
       }
       
@@ -168,7 +189,7 @@ export default function NewProductPage() {
   return (
     <div className="relative">
       <div className="mx-auto max-w-3xl p-8">
-        <h1 className="mb-6 text-3xl font-bold text-gray-900">Upload New Product</h1>
+        <h1 className="mb-6 text-3xl font-bold text-gray-900">Edit Product</h1>
         
         <form onSubmit={handleSubmit} className="space-y-6 rounded-lg bg-white p-6 shadow-md">
           {/* Basic Info */}
@@ -215,12 +236,12 @@ export default function NewProductPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="form-label">Unit Price (RM)</label>
-              <input type="text" required value={totalUnitPrice} className="form-input bg-gray-200" disabled/>
+              <input type="number" required value={totalUnitPrice.toFixed(2)} className="form-input bg-gray-200" disabled/>
             </div>
             <div>
               <label className="form-label">Suggested Price (RM)</label>
               <div className='relative flex'>
-                <input type="text" required value={suggestedPrice} className="form-input bg-gray-200" disabled/>
+                <input type="number" required value={suggestedPrice.toFixed(2)} className="form-input bg-gray-200" disabled/>
                 <button className='absolute button w-[20%] right-5 mt-3' onClick={() => setItemPrice(suggestedPrice) }>Use</button>
               </div>
             </div>
@@ -261,7 +282,7 @@ export default function NewProductPage() {
               <div key={index} className="mb-3 flex items-center gap-4">
                 <select 
                   value={mat.stockCode} 
-                  onChange={(e) => { handleUpdateMaterial(index, 'stockCode', e.target.value), handleTotalUnitPrice(index, e.target.value, mat.quantity) }}
+                  onChange={(e) => { handleUpdateMaterial(index, 'stockCode', e.target.value) }}
                   className="flex-1 rounded border p-2 text-gray-900" required
                 >
                   <option value="">Select Stock...</option>
@@ -273,7 +294,7 @@ export default function NewProductPage() {
                 </select>
                 <input 
                   type="number" min="1" value={mat.quantity} 
-                  onChange={(e) => { handleUpdateMaterial(index, 'quantity', parseInt(e.target.value)), handleTotalUnitPrice(index, mat.stockCode, parseInt(e.target.value))}}
+                  onChange={(e) => { handleUpdateMaterial(index, 'quantity', parseInt(e.target.value)) }}
                   className="w-24 rounded border p-2 text-gray-900" required placeholder="Qty"
                 />
               </div>
@@ -288,7 +309,7 @@ export default function NewProductPage() {
           </button>
         </form>
       </div>
-      {(imageFile || suggestedPrice > 0) && (
+      {((imageFile || originalImageFile) || suggestedPrice > 0) && (
         <div className='absolute left-[calc(50%+420px)] top-8 w-75 rounded-lg bg-white p-6 shadow-md mt-15'>
           {suggestedPrice > 0 && (
             <div className='flex gap-3 items-center'>
@@ -306,10 +327,10 @@ export default function NewProductPage() {
               </select>
             </div>
           )}
-          {imageFile && (
+          {(imageFile || originalImageFile) && (
             <div>
               <p className='mt-4 mb-2 text-sm font-semibold text-gray-800'>Product Image:</p>
-              <img src={URL.createObjectURL(imageFile)} alt='Product Image' className='h-full w-full shadow-md'/>
+              <img src={imageFile ? URL.createObjectURL(imageFile) : originalImageFile} alt='Product Image' className='h-full w-full shadow-md'/>
             </div>
           )}
         </div>

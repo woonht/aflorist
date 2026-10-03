@@ -68,9 +68,16 @@ export default function ProductManagement() {
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{product.itemcategory}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">RM {product.itemprice.toFixed(2)}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                  <button onClick={() => handleArchiveProduct(product.itemcode)} className="bg-red-600 hover:bg-red-900 text-white font-semibold w-[70%] py-3 rounded-full cursor-pointer">
-                    Delete
-                  </button>
+                  <div className='grid grid-cols-1'>
+                    <button onClick={() => router.push(`/admin/products/edit?ItemCode=${product.itemcode}`)} className="bg-[#B8CCD8] hover:bg-blue-300 text-white font-semibold rounded cursor-pointer">
+                      Edit
+                    </button>
+                  </div>
+                  <div className='grid grid-cols-1'>
+                    <button onClick={() => handleArchiveProduct(product.itemcode)} className="bg-[#EBA7A0] hover:bg-red-400 text-white font-semibold rounded cursor-pointer">
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

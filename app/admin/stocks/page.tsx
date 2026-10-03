@@ -6,6 +6,8 @@ import { createClient } from '@/utils/supabase/client'
 import { StockMaster } from '@/types/database'
 
 function StockRow ({ item, handleUpdateStock, handleArchiveProduct }: { item: any, handleUpdateStock: any, handleArchiveProduct: any }) {
+  const router = useRouter()
+  
   const [tempQty, setTempQty] = useState(item.stockquantity)
   const [tempPrice, setTempPrice] = useState(item.unitprice)
   const isChanged = tempQty !== item.stockquantity || tempPrice !== item.unitprice
@@ -44,13 +46,20 @@ function StockRow ({ item, handleUpdateStock, handleArchiveProduct }: { item: an
         />
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-        <div className='flex gap-4'>
-          <button onClick={() => handleArchiveProduct(item.stockcode)} className="bg-red-600 hover:bg-red-900 text-white font-semibold w-[55%] py-3 rounded-full cursor-pointer">
-            Delete
-          </button>
-          <button onClick={() => {handleUpdateStock(item.stockcode, tempQty, tempPrice), console.log(isChanged)}} className="bg-[#B8CCD8] hover:bg-[#A8B59A] rounded-full cursor-pointer font-semibold text-white w-[45%] py-3 disabled:opacity-50 disabled:cursor-default disabled:hover:bg-[#B8CCD8]" disabled={!isChanged}>
-            Save
-          </button>
+        <div className='flex flex-col'>
+          <div className='grid grid-cols-2'>
+            <button onClick={() => router.push(`/admin/stocks/edit?StockCode=${item.stockcode}`)} className="bg-[#B8CCD8] hover:bg-blue-300 cursor-pointer font-semibold text-white rounded" >
+              Edit
+            </button>
+            <button onClick={() => handleUpdateStock(item.stockcode, tempQty, tempPrice)} className="bg-[#A8B59A] hover:bg-green-500 cursor-pointer font-semibold text-white rounded disabled:opacity-50 disabled:cursor-default disabled:hover:bg-[#A8B59A]" disabled={!isChanged}>
+              Save
+            </button>
+          </div>
+          <div className='grid grid-cols-1'>
+            <button onClick={() => handleArchiveProduct(item.stockcode)} className="bg-[#EBA7A0] hover:bg-red-400 text-white rounded font-semibold cursor-pointer">
+              Delete
+            </button>
+          </div>
         </div>
       </td>
     </tr>
