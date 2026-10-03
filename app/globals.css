@@ -48,4 +48,8 @@ body {
   .form-input {
     @apply mt-1 w-full rounded border p-2 text-gray-900;
   }
+
+  .image-enlarge {
+    @apply relative transition-transform duration-300 hover:z-50 hover:scale-[7]
+  }
 }

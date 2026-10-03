@@ -57,9 +57,9 @@ export default function ProductManagement() {
           <tbody className="divide-y divide-gray-200 bg-white">
             {products.map(product => (
               <tr key={product.itemcode}>
-                <td className="whitespace-nowrap px-6 py-4">
+                <td className="whitespace-nowrap px-6 py-4 absolute">
                   {product.imageurl ? (
-                    <img src={product.imageurl} alt="img" className="h-12 w-12 rounded object-cover shadow-sm" />
+                    <img src={product.imageurl} alt="img" className="h-12 w-12 rounded object-cover shadow-sm image-enlarge" />
                   ) : (
                     <div className="h-12 w-12 rounded bg-gray-100" />
                   )}
